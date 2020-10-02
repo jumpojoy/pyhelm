@@ -225,6 +225,16 @@ class ChartBuilder(object):
             self._logger.info("Building dependency chart %s for release %s", 
                               chart.name, self.chart.name)
             dependencies.append(ChartBuilder(chart).get_helm_chart())
+        else:
+            dependencies_folder = "%s/charts" % self.source_directory
+            if os.path.exists(dependencies_folder):
+                self._logger.info("Looking for built in dependencies for chart %s.", self.chart.name)
+                dependencies_folder = "%s/charts" % self.source_directory
+                for dependency_name in os.listdir(dependencies_folder):
+                    self._logger.info("Found dependency %s for chart %s", dependency_name, self.chart.name)
+                    dependency_folder = "%s/%s" % (dependencies_folder, dependency_name)
+                    dependency_chart = {"name": dependency_name, "source": {"type": "directory", "location": dependency_folder}}
+                dependencies.append(ChartBuilder(dependency_chart).get_helm_chart())
 
         helm_chart = Chart(
             metadata=self.get_metadata(),
