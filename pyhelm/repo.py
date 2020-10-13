@@ -124,11 +124,12 @@ def repo_index(repo_url, headers=None):
         )
     )
 
-def from_repo(repo_url, chart, version=None, headers=None):
-    """Downloads the chart from a repo to a temporary dir, the path of which is
-    determined by the platform.
+def from_repo(repo_url, chart, version=None, headers=None, destination_dir=None):
+    """Downloads the chart from a repo to a destination_dir if specified,
+       otherwise to temporary dir, the path of which is determined by the
+        platform.
     """
-    _tmp_dir = tempfile.mkdtemp(prefix='pyhelm-')
+    destination_dir = destination_dir or tempfile.mkdtemp(prefix='pyhelm-')
     repo_scheme = urlparse(repo_url).scheme
     index = repo_index(repo_url, headers)
 
@@ -155,8 +156,8 @@ def from_repo(repo_url, chart, version=None, headers=None):
                 fobj = io.StringIO(data)
 
             tar = tarfile.open(mode="r:*", fileobj=fobj)
-            tar.extractall(_tmp_dir)
-            return os.path.join(_tmp_dir, chart)
+            tar.extractall(destination_dir)
+            return os.path.join(destination_dir, chart)
     except IndexError:
         raise VersionError(version)
 
